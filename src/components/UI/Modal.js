@@ -34,7 +34,9 @@ class CustomModal extends Component {
     const { toggle, onSave } = this.props;
     return (
       <Modal isOpen={true} toggle={toggle}>
-        <ModalHeader toggle={toggle}>Projekt</ModalHeader>
+        <ModalHeader toggle={toggle}>
+          Projekt: {this.state.activeItem.name}
+        </ModalHeader>
         <ModalBody>
           <Form>
             <FormGroup>
@@ -73,7 +75,7 @@ class CustomModal extends Component {
         </ModalBody>
         <ModalFooter>
           <Button color="success" onClick={() => onSave(this.state.activeItem)}>
-            Dodaj
+            Zapisz
           </Button>
         </ModalFooter>
       </Modal>

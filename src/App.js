@@ -28,7 +28,7 @@ class App extends Component {
         </main>
 
         <footer className="bg-dark p-5 text-white text-center">
-          Menadżer projektów
+          Menedżer projektów
         </footer>
       </>
     );

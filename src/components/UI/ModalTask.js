@@ -10,51 +10,39 @@ import {
   FormGroup,
   Input,
   Label,
-  Col,
 } from "reactstrap";
 
-class CustomModal extends Component {
+class ModalTask extends Component {
   constructor(props) {
     super(props);
     this.state = {
       activeItem: {
+        id: props.activeItem.id,
         name: props.activeItem.name,
         description: props.activeItem.description,
         deadline: props.activeItem.deadline,
-        studentIds: props.activeItem.studentIds,
+        projectId: props.projectId,
       },
     };
   }
 
-  componentDidMount() {
-    this.props.fetchStudents();
-  }
-
-  tab = [];
   // to check if the checkbox is cheked or not
   handleChange = (e) => {
     let { name, value } = e.target;
-    if (e.target.type === "select-multiple") {
-      value = e.target.value;
-      this.tab.push(parseInt(value));
-      console.log(this.tab);
+    if (e.target.type === "checkbox") {
+      value = e.target.checked;
     }
-    const activeItem = {
-      ...this.state.activeItem,
-      [name]: value,
-      studentIds: this.tab,
-    };
+    const activeItem = { ...this.state.activeItem, [name]: value };
     this.setState({ activeItem });
+    console.log(activeItem);
   };
 
   render() {
-    const usersList = this.props.usersList.map((item) => item);
-    const usersList2 = usersList.map((item) => item);
     const { toggle, onSave } = this.props;
     return (
       <Modal isOpen={true} toggle={toggle}>
         <ModalHeader toggle={toggle}>
-          Projekt: {this.state.activeItem.name}
+          Zadanie: {this.state.activeItem.name}
         </ModalHeader>
         <ModalBody>
           <Form>
@@ -82,44 +70,14 @@ class CustomModal extends Component {
             </FormGroup>
 
             <FormGroup>
-              <Label for="deadline">Obrona projektu</Label>
+              <Label for="deadline">Obrona Zadania</Label>
               <Input
-                type="date"
+                type="datetime-local"
                 name="deadline"
                 value={this.state.activeItem.deadline}
                 onChange={this.handleChange}
               />
             </FormGroup>
-            <FormGroup row className="mt-3">
-              <Label for="studentIds" sm={2}>
-                Dodaj studenta
-              </Label>
-              <Col sm={10}>
-                <Input
-                  type="select"
-                  name="studentIds"
-                  id="studentIds"
-                  multiple
-                  // value={this.state.activeItem.studentIds}
-                  onChange={this.handleChange}
-                >
-                  {usersList2
-                    .sort(
-                      (
-                        { indexNumber: previousID },
-                        { indexNumber: currentID }
-                      ) => previousID - currentID
-                    )
-                    .map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.indexNumber} - {item.firstName} {item.lastName}{" "}
-                      </option>
-                    ))}
-                  <option>1</option>
-                </Input>
-              </Col>
-            </FormGroup>
-            <FormGroup row></FormGroup>
           </Form>
         </ModalBody>
         <ModalFooter>
@@ -127,12 +85,9 @@ class CustomModal extends Component {
             Zapisz
           </Button>
         </ModalFooter>
-        {/* {usersList2.map((item) => (
-          <div>{item.id}</div>
-        ))} */}
       </Modal>
     );
   }
 }
 
-export default CustomModal;
+export default ModalTask;

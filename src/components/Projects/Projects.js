@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 
 import Modal from "../UI/Modal";
 import SearchBox from "../SearchBox";
+import { getRole, getUser } from "../../Utils/Common";
 
 import "react-bootstrap-table-next/dist/react-bootstrap-table2.min.css";
 import "react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css";
@@ -22,9 +23,11 @@ class Projects extends Component {
         name: "",
         description: "",
         deadline: "",
+        studentIds: null,
       },
       searchField: "",
       projectList: [],
+      usersList: [],
     };
   }
 
@@ -32,9 +35,37 @@ class Projects extends Component {
     this.refreshList();
   }
 
+  user = getUser();
+  role = getRole();
+
+  studentsList = () => {
+    axios
+      .get(`https://localhost:8443/students?size=100`, {
+        auth: {
+          username: this.user[0],
+          password: this.user[1],
+        },
+      })
+      .then((res) => this.setState({ usersList: res.data.content }))
+      .catch((err) => console.log(err));
+  };
+
   refreshList = () => {
     axios
-      .get("http://localhost:8080/projects")
+      .get("https://localhost:8443/projects?size=100", {
+        // withCredentials: true,
+        auth: {
+          username: this.user[0],
+          password: this.user[1],
+        },
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        // headers: {
+        //   Authorization: `Basic ${this.auth()}`,
+        // },
+      })
       .then((res) => this.setState({ projectList: res.data.content }))
       .catch((err) => console.log(err));
   };
@@ -48,18 +79,33 @@ class Projects extends Component {
     this.toggle();
     if (item.id) {
       axios
-        .put(`http://localhost:8080/projects/${item.id}`, item)
+        .put(`https://localhost:8443/projects/${item.id}`, item, {
+          auth: {
+            username: this.user[0],
+            password: this.user[1],
+          },
+        })
         .then((res) => this.refreshList());
     }
     axios
-      .post("http://localhost:8080/projects", item)
+      .post("https://localhost:8443/projects", item, {
+        auth: {
+          username: this.user[0],
+          password: this.user[1],
+        },
+      })
       .then((res) => this.refreshList());
     alert("Zapisano!" + JSON.stringify(item));
   };
 
   handleDelete = (item) => {
     axios
-      .delete(`http://localhost:8080/projects/${item.id}`, item)
+      .delete(`https://localhost:8443/projects/${item.id}`, {
+        auth: {
+          username: this.user[0],
+          password: this.user[1],
+        },
+      })
       .then((res) => this.refreshList());
   };
 
@@ -72,14 +118,26 @@ class Projects extends Component {
     this.setState({ activeItem: item, modal: !this.state.modal });
   };
 
+  currentDateTime = () => {
+    let today = new Date();
+    let date =
+      today.getFullYear() +
+      "-" +
+      (today.getMonth() + 1) +
+      "-" +
+      today.getDate();
+
+    return date;
+  };
+
   i = 1;
   columns = [
     {
       dataField: "lp",
       text: "Lp.",
-      sort: true,
-      formatter: (rowContent, row) => {
-        return <strong>{this.i++}</strong>;
+      style: { textAlign: "center" },
+      formatter: (rowContent, row, i) => {
+        return <strong>{++i}</strong>;
       },
       headerStyle: (colum, colIndex) => {
         return { width: "80px", textAlign: "center" };
@@ -89,6 +147,7 @@ class Projects extends Component {
       dataField: "id",
       text: "Id",
       sort: true,
+      style: { textAlign: "center" },
       headerStyle: (colum, colIndex) => {
         return { width: "80px", textAlign: "center" };
       },
@@ -98,6 +157,7 @@ class Projects extends Component {
       text: "Nazwa",
       sort: true,
       footerAlign: "center",
+      style: { textAlign: "center" },
       headerStyle: (colum, colIndex) => {
         return { textAlign: "center" };
       },
@@ -105,6 +165,7 @@ class Projects extends Component {
     {
       dataField: "description",
       text: "Opis",
+      style: { textAlign: "center" },
       headerStyle: (colum, colIndex) => {
         return { textAlign: "center" };
       },
@@ -113,6 +174,38 @@ class Projects extends Component {
       dataField: "deadline",
       text: "Data obrony",
       sort: true,
+      style: { textAlign: "center" },
+      headerStyle: (colum, colIndex) => {
+        return { textAlign: "center" };
+      },
+      formatter: (rowContent, row) => {
+        const newDate = new Date(row.deadline.replace("T", " "));
+        let date1 =
+          newDate.getFullYear() +
+          "-" +
+          (newDate.getMonth() + 1) +
+          "-" +
+          newDate.getDate();
+
+        const date = date1;
+        return date > this.currentDateTime() ? (
+          <p className="text-primary">{row.deadline.replace("T", " ")}</p>
+        ) : (
+          <p className="text-danger">{row.deadline.replace("T", " ")}</p>
+        );
+      },
+    },
+    {
+      dataField: "creationTimestamp",
+      text: "Utworzono",
+      style: { textAlign: "center" },
+      formatter: (rowContent, row) => {
+        return row.creationTimestamp
+          .replace("T", " ")
+          .replace(".", " ")
+          .substr(0, 19)
+          .split("");
+      },
       headerStyle: (colum, colIndex) => {
         return { textAlign: "center" };
       },
@@ -124,20 +217,24 @@ class Projects extends Component {
         return (
           <div className="d-flex flex-column">
             <Link to={`/projects/${row.id}/tasks`} className="btn btn-primary">
-              Zadania
+              <i className="fas fa-tasks fa-lg"></i>
             </Link>
-            <button
-              className="btn btn-warning mr-2"
-              onClick={() => this.editItem(row)}
-            >
-              Edytuj
-            </button>
-            <button
-              className="btn btn-danger mr-2"
-              onClick={() => this.handleDelete(row)}
-            >
-              Usuń
-            </button>
+            {this.role === "[ROLE_LECTURER]" ? (
+              <>
+                <button
+                  className="btn btn-warning mr-2"
+                  onClick={() => this.editItem(row)}
+                >
+                  <i className="fas fa-edit fa-lg"></i>
+                </button>
+                <button
+                  className="btn btn-danger mr-2"
+                  onClick={() => this.handleDelete(row)}
+                >
+                  <i className="fas fa-trash-alt fa-lg"></i>
+                </button>{" "}
+              </>
+            ) : null}
           </div>
         );
       },
@@ -174,66 +271,7 @@ class Projects extends Component {
         data={list}
         pagination={this.pagination}
         actions={this.editItem}
-        // filter={filterFactory()}
       />
-      // <Table
-      //   pagination={this.pagination}
-      //   className="text-center align-middle"
-      //   responsive
-      //   striped
-      //   bordered
-      //   hover
-      // >
-      //   <thead>
-      //     <tr>
-      //       <th>Lp.</th>
-      //       <th>ID</th>
-      //       <th>Nazwa</th>
-      //       <th>Opis</th>
-      //       <th>Utworzony</th>
-      //       <th>Data obrony</th>
-      //       <th>Akcje</th>
-      //     </tr>
-      //   </thead>
-      //   <tbody>
-      //     {list.map((item, i) => (
-      //       <tr key={item.id}>
-      //         <td>
-      //           <strong>{i + 1}</strong>
-      //         </td>
-      //         <td>{item.id}</td>
-      //         <td>
-      //           <strong>{item.name}</strong>
-      //         </td>
-      //         <td>{item.description}</td>
-      //         <td>{item.creationTimestamp}</td>
-      //         <td>{item.deadline}</td>
-      //         <td>
-      //           <div className="d-flex flex-column">
-      //             <Link
-      //               to={`/projects/${item.id}/tasks`}
-      //               className="btn btn-info"
-      //             >
-      //               Zadania
-      //             </Link>
-      //             <button
-      //               className="btn btn-warning mr-2"
-      //               onClick={() => this.editItem(item)}
-      //             >
-      //               Edytuj
-      //             </button>
-      //             <button
-      //               className="btn btn-danger mr-2"
-      //               onClick={() => this.handleDelete(item)}
-      //             >
-      //               Usuń
-      //             </button>
-      //           </div>
-      //         </td>
-      //       </tr>
-      //     ))}
-      //   </tbody>
-      // </Table>
     );
   };
   render() {
@@ -244,18 +282,25 @@ class Projects extends Component {
     return (
       <>
         <h1 className="text-white text-uppercase text-center my-4">
-          Lista projektów
+          {this.role === "[ROLE_LECTURER]"
+            ? "Lista projektów"
+            : "Twoje projekty"}
         </h1>
+
         <div className="row">
           <div className=" col-sma-10 mx-auto p-0">
             <div className="card p-3">
               <div className="text-center">
-                <button
-                  className="btn btn-success mb-2"
-                  onClick={this.createItem}
-                >
-                  Dodaj projekt
-                </button>
+                {this.role === "[ROLE_LECTURER]" ? (
+                  <button
+                    className="btn btn-success mb-2"
+                    onClick={this.createItem}
+                  >
+                    Dodaj projekt
+                  </button>
+                ) : (
+                  <></>
+                )}
                 <div>
                   <SearchBox
                     placeholder="Wyszukaj projekt..."
@@ -276,11 +321,19 @@ class Projects extends Component {
 
         {this.state.modal ? (
           <Modal
+            fetchStudents={this.studentsList}
             activeItem={this.state.activeItem}
             toggle={this.toggle}
             onSave={this.handleSubmit}
+            usersList={this.state.usersList}
           />
         ) : null}
+        {/* <div className="bg-success">
+          hehehe
+          {this.state.activeItem.usersList.map((item, i) => (
+            <p>{item.firstName}</p>
+          ))}
+        </div> */}
       </>
     );
   }

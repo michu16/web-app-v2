@@ -3,6 +3,11 @@ import "./App.css";
 
 import Projects from "./components/Projects/Projects";
 import Tasks from "./components/Tasks/Tasks";
+import Login from "./components/Authentication/Login";
+import Register from "./components/Authentication/Register";
+import Navbar from "./components/UI/Navbar";
+import Users from "./components/Users/Users";
+import { removeUserSession } from "./Utils/Common";
 
 import { Container } from "react-bootstrap-v5";
 
@@ -15,13 +20,18 @@ class App extends Component {
 
   render() {
     return (
-      <>
-        <main className="content p-4 bg-dark">
-          <Container className="bg-success">
+      <div className="content bg-dark">
+        <main className="content p-5 bg-dark">
+          <Container>
+            {localStorage.getItem("user-info") === null ? null : <Navbar />}
             <Router>
               <Switch>
-                <Route exact path="/" component={Projects} />
+                <Route exact path="/" component={Login} />
+                <Route exact path="/projects" component={Projects} />
                 <Route path="/projects/:id/tasks" component={Tasks} />
+                <Route exact path="/users" component={Users} />
+                <Route exact path="/addUser" component={Register} />
+                <Route path="/logout" component={removeUserSession} />
               </Switch>
             </Router>
           </Container>
@@ -30,7 +40,7 @@ class App extends Component {
         <footer className="bg-dark p-5 text-white text-center">
           Menedżer projektów
         </footer>
-      </>
+      </div>
     );
   }
 }

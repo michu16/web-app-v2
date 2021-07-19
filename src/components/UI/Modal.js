@@ -6,50 +6,29 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Form,
   FormGroup,
-  Input,
-  Label,
-  Col,
 } from "reactstrap";
 
+import { AvForm, AvField } from "availity-reactstrap-validation";
 class CustomModal extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      activeItem: {
-        name: props.activeItem.name,
-        description: props.activeItem.description,
-        deadline: props.activeItem.deadline,
-        studentIds: props.activeItem.studentIds,
-      },
+      activeItem: this.props.activeItem,
     };
   }
 
-  componentDidMount() {
-    this.props.fetchStudents();
-  }
-
-  tab = [];
   // to check if the checkbox is cheked or not
   handleChange = (e) => {
     let { name, value } = e.target;
-    if (e.target.type === "select-multiple") {
-      value = e.target.value;
-      this.tab.push(parseInt(value));
-      console.log(this.tab);
+    if (e.target.type === "checkbox") {
+      value = e.target.checked;
     }
-    const activeItem = {
-      ...this.state.activeItem,
-      [name]: value,
-      studentIds: this.tab,
-    };
+    const activeItem = { ...this.state.activeItem, [name]: value };
     this.setState({ activeItem });
   };
 
   render() {
-    const usersList = this.props.usersList.map((item) => item);
-    const usersList2 = usersList.map((item) => item);
     const { toggle, onSave } = this.props;
     return (
       <Modal isOpen={true} toggle={toggle}>
@@ -57,79 +36,81 @@ class CustomModal extends Component {
           Projekt: {this.state.activeItem.name}
         </ModalHeader>
         <ModalBody>
-          <Form>
+          <AvForm>
             <FormGroup>
-              <Label for="name">Nazwa</Label>
-              <Input
-                type="text"
+              <AvField
                 name="name"
+                label="Nazwa projektu"
+                type="text"
+                errorMessage="Nieprawidłowa nazwa"
                 value={this.state.activeItem.name}
                 onChange={this.handleChange}
                 placeholder="Wprowadź nazwę projektu"
+                validate={{
+                  required: { value: true, errorMessage: "Wprowadź nazwę" },
+                  minLength: {
+                    value: 4,
+                    errorMessage: "Nazwa musi posiadać minimum 6 znaków",
+                  },
+                  maxLength: {
+                    value: 30,
+                    errorMessage: "Nazwa może posiadać maksymalnie 30 znaków",
+                  },
+                }}
               />
             </FormGroup>
 
             <FormGroup>
-              <Label for="description">Opis</Label>
-              <Input
+              <AvField
+                name="description"
+                label="Opis projektu"
                 type="textarea"
                 rows="4"
-                name="description"
+                errorMessage="Nieprawidłowy opis"
                 value={this.state.activeItem.description}
                 onChange={this.handleChange}
                 placeholder="Wprowadź opis projektu"
+                validate={{
+                  required: {
+                    value: true,
+                    errorMessage: "Wprowadź opis projektu",
+                  },
+                  minLength: {
+                    value: 10,
+                    errorMessage: "Opis musi posiadać minimum 10 znaków",
+                  },
+                  maxLength: {
+                    value: 300,
+                    errorMessage: "Opis może posiadać maksymalnie 300 znaków",
+                  },
+                }}
               />
             </FormGroup>
 
             <FormGroup>
-              <Label for="deadline">Obrona projektu</Label>
-              <Input
-                type="date"
+              <AvField
                 name="deadline"
+                label="Obrona projektu"
+                type="date"
+                required
+                errorMessage="Nieprawidłowa data"
                 value={this.state.activeItem.deadline}
                 onChange={this.handleChange}
+                validate={{
+                  required: {
+                    value: true,
+                    errorMessage: "Wprowadź datę obrony",
+                  },
+                }}
               />
             </FormGroup>
-            <FormGroup row className="mt-3">
-              <Label for="studentIds" sm={2}>
-                Dodaj studenta
-              </Label>
-              <Col sm={10}>
-                <Input
-                  type="select"
-                  name="studentIds"
-                  id="studentIds"
-                  multiple
-                  // value={this.state.activeItem.studentIds}
-                  onChange={this.handleChange}
-                >
-                  {usersList2
-                    .sort(
-                      (
-                        { indexNumber: previousID },
-                        { indexNumber: currentID }
-                      ) => previousID - currentID
-                    )
-                    .map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.indexNumber} - {item.firstName} {item.lastName}{" "}
-                      </option>
-                    ))}
-                  <option>1</option>
-                </Input>
-              </Col>
-            </FormGroup>
-            <FormGroup row></FormGroup>
-          </Form>
+          </AvForm>
         </ModalBody>
         <ModalFooter>
           <Button color="success" onClick={() => onSave(this.state.activeItem)}>
             Zapisz
           </Button>
         </ModalFooter>
-        {/* {usersList2.map((item) => (
-          <div>{item.id}</div>
-        ))} */}
       </Modal>
     );
   }

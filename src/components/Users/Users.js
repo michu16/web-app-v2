@@ -75,7 +75,7 @@ class Users extends Component {
         },
       })
       .then((res) => this.refreshList());
-    alert("Zapisano!" + JSON.stringify(item));
+    // alert("Zapisano!" + JSON.stringify(item));
   };
 
   createItem = () => {
@@ -103,6 +103,7 @@ class Users extends Component {
     {
       dataField: "lp",
       text: "Lp.",
+      style: { textAlign: "center" },
       formatter: (rowContent, row, i) => {
         return <strong>{++i}</strong>;
       },
@@ -114,6 +115,7 @@ class Users extends Component {
       dataField: "id",
       text: "Id",
       sort: true,
+      style: { textAlign: "center" },
       headerStyle: (colum, colIndex) => {
         return { width: "80px", textAlign: "center" };
       },
@@ -123,6 +125,7 @@ class Users extends Component {
       text: "Imię",
       sort: true,
       footerAlign: "center",
+      style: { textAlign: "center" },
       headerStyle: (colum, colIndex) => {
         return { textAlign: "center" };
       },
@@ -131,6 +134,7 @@ class Users extends Component {
       dataField: "lastName",
       sort: true,
       text: "Nazwisko",
+      style: { textAlign: "center" },
       headerStyle: (colum, colIndex) => {
         return { textAlign: "center" };
       },
@@ -139,6 +143,7 @@ class Users extends Component {
       dataField: "email",
       text: "Adres E-mail",
       sort: true,
+      style: { textAlign: "center" },
       headerStyle: (colum, colIndex) => {
         return { textAlign: "center" };
       },
@@ -147,6 +152,7 @@ class Users extends Component {
       dataField: "indexNumber",
       text: "Numer indeksu",
       sort: true,
+      style: { textAlign: "center" },
       headerStyle: (colum, colIndex) => {
         return { textAlign: "center" };
       },
@@ -155,6 +161,7 @@ class Users extends Component {
       dataField: "fullTimeStudies",
       text: "Forma studiów",
       sort: true,
+      style: { textAlign: "center" },
       formatter: (rowContent, row) => {
         return (
           <p>
@@ -233,7 +240,7 @@ class Users extends Component {
         {this.role === "[ROLE_LECTURER]" ? (
           <>
             <h1 className="text-white text-uppercase text-center my-4">
-              Lista użytkowników
+              Lista studentów
             </h1>
             <div className="row">
               <div className=" col-sma-10 mx-auto p-0">

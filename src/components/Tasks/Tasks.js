@@ -3,7 +3,6 @@ import React, { Component } from "react";
 import { getRole, getUser } from "../../Utils/Common";
 
 import axios from "axios";
-import { Table } from "react-bootstrap-v5";
 import { withRouter } from "react-router-dom";
 import ModalTask from "../UI/ModalTask";
 import "react-bootstrap-table-next/dist/react-bootstrap-table2.min.css";
@@ -12,21 +11,28 @@ import SearchBox from "../SearchBox";
 
 import BootstrapTable from "react-bootstrap-table-next";
 import paginationFactory from "react-bootstrap-table2-paginator";
+import ModalStudent from "../UI/ModalStudent";
 
 class Tasks extends Component {
   constructor(props) {
     super(props);
     this.state = {
       modal: false,
+      modal2: false,
       activeItem: {
         name: "",
         description: "",
         deadline: "",
       },
+      activeStudent: {
+        project_Id: this.currentProjectId,
+        student_Id: null,
+      },
       searchField: "",
       searchStudentField: "",
       tasksList: [],
       studentsList: [],
+      allStudents: [],
     };
     this.currentProjectId = props.match.params.id;
   }
@@ -34,6 +40,7 @@ class Tasks extends Component {
   componentDidMount() {
     this.refreshList();
     this.userInProjectList();
+    this.allUsers();
   }
 
   user = getUser();
@@ -66,14 +73,27 @@ class Tasks extends Component {
       .catch((err) => console.log(err));
   };
 
+  allUsers = () => {
+    axios
+      .get(`https://localhost:8443/students`, {
+        auth: {
+          username: this.user[0],
+          password: this.user[1],
+        },
+      })
+      .then((res) => this.setState({ allStudents: res.data.content }))
+      .catch((err) => console.log(err));
+  };
   // Create toggle property
   toggle = () => {
     this.setState({ modal: !this.state.modal });
   };
 
+  toggle2 = () => {
+    this.setState({ modal2: !this.state.modal2 });
+  };
+
   handleSubmit = (item) => {
-    this.toggle();
-    console.log(item);
     if (item.id) {
       axios
         .put(`https://localhost:8443/tasks/${item.id}`, item, {
@@ -83,21 +103,40 @@ class Tasks extends Component {
           },
         })
         .then((res) => this.refreshList());
+    } else if (item.student_Id) {
+      axios
+        .post(
+          `https://localhost:8443/projects/${this.currentProjectId}/students/${item.student_Id}`,
+          item,
+          {
+            auth: {
+              username: this.user[0],
+              password: this.user[1],
+            },
+          }
+        )
+        .then((res) => this.userInProjectList());
+      // alert("Zapisano!" + JSON.stringify(item));
+    } else {
+      axios
+        .post("https://localhost:8443/tasks", item, {
+          auth: {
+            username: this.user[0],
+            password: this.user[1],
+          },
+        })
+        .then((res) => this.refreshList());
+      // alert("Zapisano!" + JSON.stringify(item));
     }
-    axios
-      .post("https://localhost:8443/tasks", item, {
-        auth: {
-          username: this.user[0],
-          password: this.user[1],
-        },
-      })
-      .then((res) => this.refreshList());
-    alert("Zapisano!" + JSON.stringify(item));
   };
-
   createItem = () => {
     const item = { name: "", modal: !this.state.modal };
     this.setState({ activeItem: item, modal: !this.state.modal });
+  };
+
+  createItem2 = () => {
+    const item = { name: "", modal2: !this.state.modal2 };
+    this.setState({ activeStudent: item, modal2: !this.state.modal2 });
   };
 
   editItem = (item) => {
@@ -113,6 +152,22 @@ class Tasks extends Component {
         },
       })
       .then((res) => this.refreshList());
+  };
+
+  handleDeleteStudent = (item) => {
+    console.log(item);
+    axios
+      .delete(
+        `https://localhost:8443/projects/${this.currentProjectId}/students/${item.id}`,
+
+        {
+          auth: {
+            username: this.user[0],
+            password: this.user[1],
+          },
+        }
+      )
+      .then((res) => this.userInProjectList());
   };
 
   currentDateTime = () => {
@@ -199,7 +254,7 @@ class Tasks extends Component {
           ":" +
           newDate.getSeconds();
         const date = date1 + " " + time1;
-        return date > this.currentDateTime() ? (
+        return date >= this.currentDateTime() ? (
           <p className="text-primary">{row.deadline.replace("T", " ")}</p>
         ) : (
           <p className="text-danger">{row.deadline.replace("T", " ")}</p>
@@ -325,7 +380,7 @@ class Tasks extends Component {
             {this.role === "[ROLE_LECTURER]" ? (
               <button
                 className="btn btn-danger mr-2"
-                onClick={() => this.handleDelete(row)}
+                onClick={() => this.handleDeleteStudent(row)}
               >
                 <i className="fas fa-trash-alt fa-lg"></i>
               </button>
@@ -388,7 +443,7 @@ class Tasks extends Component {
     const { tasksList, searchField } = this.state;
     const { studentsList, searchStudentField } = this.state;
     const filteredTasks = tasksList.filter((task) =>
-      task.description.toLowerCase().includes(searchField.toLowerCase())
+      task.name.toLowerCase().includes(searchField.toLowerCase())
     );
     const filteredStudents = studentsList.filter((student) =>
       student.lastName.toLowerCase().includes(searchStudentField.toLowerCase())
@@ -396,9 +451,7 @@ class Tasks extends Component {
     return (
       <>
         <h1 className="text-white text-uppercase text-center my-4">
-          {this.role === "[ROLE_LECTURER]"
-            ? "Lista projektów"
-            : "Twoje projekty"}
+          Lista zadań
         </h1>
 
         <div className="row">
@@ -433,14 +486,14 @@ class Tasks extends Component {
               {this.state.tasksList.length && filteredTasks.length > 0 ? (
                 <>{this.renderItems(filteredTasks)}</>
               ) : (
-                <h1 className="text-center my-4">Nie znaleziono zadania</h1>
+                <h1 className="text-center my-4">Brak</h1>
               )}
             </div>
           </div>
         </div>
 
         <h1 className="text-white text-uppercase text-center my-4">
-          Lista studentów w projekcie
+          Studenci biorący udział w projekcie
         </h1>
         <div className="row">
           <div className=" col-sma-10 mx-auto p-0">
@@ -449,7 +502,7 @@ class Tasks extends Component {
                 {this.role === "[ROLE_LECTURER]" ? (
                   <button
                     className="btn btn-success mb-2"
-                    onClick={this.createItem}
+                    onClick={this.createItem2}
                   >
                     Dodaj studenta
                   </button>
@@ -468,7 +521,7 @@ class Tasks extends Component {
               {this.state.studentsList.length && filteredStudents.length > 0 ? (
                 <>{this.renderStudents(filteredStudents)}</>
               ) : (
-                <h1 className="text-center my-4">Nie znaleziono studenta</h1>
+                <h1 className="text-center my-4">Brak</h1>
               )}
             </div>
           </div>
@@ -480,6 +533,16 @@ class Tasks extends Component {
             toggle={this.toggle}
             onSave={this.handleSubmit}
             projectId={this.currentProjectId}
+          />
+        ) : null}
+
+        {this.state.modal2 ? (
+          <ModalStudent
+            activeStudent={this.state.activeStudent}
+            toggle={this.toggle2}
+            onSave={this.handleSubmit}
+            projectId={this.currentProjectId}
+            usersList={this.state.allStudents}
           />
         ) : null}
       </>

@@ -4,7 +4,6 @@ import "./App.css";
 import Projects from "./components/Projects/Projects";
 import Tasks from "./components/Tasks/Tasks";
 import Login from "./components/Authentication/Login";
-import Register from "./components/Authentication/Register";
 import Navbar from "./components/UI/Navbar";
 import Users from "./components/Users/Users";
 import { removeUserSession } from "./Utils/Common";
@@ -30,7 +29,6 @@ class App extends Component {
                 <Route exact path="/projects" component={Projects} />
                 <Route path="/projects/:id/tasks" component={Tasks} />
                 <Route exact path="/users" component={Users} />
-                <Route exact path="/addUser" component={Register} />
                 <Route path="/logout" component={removeUserSession} />
               </Switch>
             </Router>

@@ -20,7 +20,7 @@ const Navbar = () => {
           {role === "[ROLE_LECTURER]" ? (
             <li className="nav-item">
               <a className="nav-link text-black" href="/users">
-                Użytkownicy
+                Studenci
               </a>
             </li>
           ) : null}

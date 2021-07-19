@@ -23,11 +23,9 @@ class Projects extends Component {
         name: "",
         description: "",
         deadline: "",
-        studentIds: null,
       },
       searchField: "",
       projectList: [],
-      usersList: [],
     };
   }
 
@@ -53,7 +51,6 @@ class Projects extends Component {
   refreshList = () => {
     axios
       .get("https://localhost:8443/projects?size=100", {
-        // withCredentials: true,
         auth: {
           username: this.user[0],
           password: this.user[1],
@@ -61,10 +58,6 @@ class Projects extends Component {
         headers: {
           "Content-Type": "application/json",
         },
-
-        // headers: {
-        //   Authorization: `Basic ${this.auth()}`,
-        // },
       })
       .then((res) => this.setState({ projectList: res.data.content }))
       .catch((err) => console.log(err));
@@ -95,7 +88,7 @@ class Projects extends Component {
         },
       })
       .then((res) => this.refreshList());
-    alert("Zapisano!" + JSON.stringify(item));
+    // alert("Zapisano!" + JSON.stringify(item));
   };
 
   handleDelete = (item) => {
@@ -188,7 +181,8 @@ class Projects extends Component {
           newDate.getDate();
 
         const date = date1;
-        return date > this.currentDateTime() ? (
+        console.log(date, this.currentDateTime());
+        return date >= this.currentDateTime() ? (
           <p className="text-primary">{row.deadline.replace("T", " ")}</p>
         ) : (
           <p className="text-danger">{row.deadline.replace("T", " ")}</p>
@@ -301,7 +295,7 @@ class Projects extends Component {
                 ) : (
                   <></>
                 )}
-                <div>
+                <div className="mb-2">
                   <SearchBox
                     placeholder="Wyszukaj projekt..."
                     handleChange={(e) =>
@@ -321,30 +315,14 @@ class Projects extends Component {
 
         {this.state.modal ? (
           <Modal
-            fetchStudents={this.studentsList}
             activeItem={this.state.activeItem}
             toggle={this.toggle}
             onSave={this.handleSubmit}
-            usersList={this.state.usersList}
           />
         ) : null}
-        {/* <div className="bg-success">
-          hehehe
-          {this.state.activeItem.usersList.map((item, i) => (
-            <p>{item.firstName}</p>
-          ))}
-        </div> */}
       </>
     );
   }
 }
-
-// renderTabList = () =>{
-//   return(
-//     <div className="my-5 tab-list">
-//       <span on
-//     </div>
-//   )
-// }
 
 export default Projects;

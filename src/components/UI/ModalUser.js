@@ -8,7 +8,8 @@ import {
   ModalFooter,
   Label,
 } from "reactstrap";
-import TextField from "@material-ui/core/TextField/TextField";
+
+import { AvForm, AvField } from "availity-reactstrap-validation";
 import MenuItem from "@material-ui/core/MenuItem/MenuItem";
 import Select from "@material-ui/core/Select/Select";
 
@@ -28,7 +29,6 @@ class ModalUser extends Component {
     };
   }
 
-  // to check if the checkbox is cheked or not
   handleChange = (e) => {
     let { name, value } = e.target;
     if (e.target.type === "checkbox") {
@@ -48,81 +48,107 @@ class ModalUser extends Component {
           Użytkownik: {this.state.activeItem.email}
         </ModalHeader>
         <ModalBody>
-          <form onSubmit={() => onSave(this.state.activeItem)}>
-            <Label for="firstName">Imię</Label>
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              value={this.state.activeItem.firstName}
-              fullWidth
-              inputProps={{ minLength: 2 }}
-              id="firstName"
-              label="Imię"
+          <AvForm>
+            <AvField
               name="firstName"
-              autoComplete="firstName"
-              autoFocus
+              label="Imię"
+              type="text"
+              errorMessage="Nieprawidłowe imię"
+              value={this.state.activeItem.firstName}
               onChange={this.handleChange}
+              placeholder="Wprowadź imię"
+              validate={{
+                required: { value: true, errorMessage: "Wprowadź imię" },
+                minLength: {
+                  value: 2,
+                  errorMessage: "Imię musi posiadać minimum 2 znaki",
+                },
+                maxLength: {
+                  value: 15,
+                  errorMessage: "Imię może posiadać maksymalnie 15 znaków",
+                },
+              }}
             />
 
-            <Label for="lastName">Nazwisko</Label>
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              value={this.state.activeItem.lastName}
-              inputProps={{ minLength: 2 }}
-              id="lastName"
-              label="Nazwisko"
+            <AvField
               name="lastName"
-              autoComplete="lastName"
+              label="Nazwisko"
+              type="text"
+              errorMessage="Nieprawidłowe Nazwisko"
+              value={this.state.activeItem.lastName}
               onChange={this.handleChange}
+              placeholder="Wprowadź nazwisko"
+              validate={{
+                required: { value: true, errorMessage: "Wprowadź nazwisko" },
+                minLength: {
+                  value: 2,
+                  errorMessage: "Nazwisko musi posiadać minimum 2 znaki",
+                },
+                maxLength: {
+                  value: 15,
+                  errorMessage: "Nazwisko może posiadać maksymalnie 15 znaków",
+                },
+              }}
             />
 
-            <Label for="email">Adres E-mail</Label>
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              value={this.state.activeItem.email}
-              type="email"
-              id="email"
-              label="Adres e-mail"
+            <AvField
               name="email"
-              autoComplete="email"
+              label="Adres E-mail"
+              type="email"
+              errorMessage="Nieprawidłowy adres e-mail"
+              value={this.state.activeItem.email}
               onChange={this.handleChange}
-            />
-            <Label for="password">Hasło</Label>
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              inputProps={{ minLength: 6 }}
-              type="password"
-              id="password"
-              label="Hasło"
-              name="password"
-              autoComplete="password"
-              onChange={this.handleChange}
+              placeholder="Wprowadź adres e-mail"
+              validate={{
+                required: {
+                  value: true,
+                  errorMessage: "Wprowadź adres e-mail",
+                },
+              }}
             />
 
-            <Label for="indexNumber">Numer indeksu</Label>
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              value={this.state.activeItem.indexNumber}
-              type="number"
-              inputProps={{ minLength: 6 }}
-              id="indexNumber"
-              label="Numer indeksu"
-              name="indexNumber"
-              autoComplete="indexNumber"
+            <AvField
+              name="password"
+              label="Hasło"
+              type="password"
+              errorMessage="Nieprawidłowe hasło"
+              value={this.state.activeItem.password}
               onChange={this.handleChange}
+              placeholder="Wprowadź hasło"
+              validate={{
+                required: {
+                  value: true,
+                  errorMessage: "Wprowadź hasło",
+                },
+                minLength: {
+                  value: 6,
+                  errorMessage: "Hasło musi posiadać minimum 6 znaków",
+                },
+              }}
+            />
+
+            <AvField
+              name="indexNumber"
+              label="Numer indeksu"
+              type="number"
+              errorMessage="Nieprawidłowy numer indeksu"
+              value={this.state.activeItem.indexNumber}
+              onChange={this.handleChange}
+              placeholder="Wprowadź numer indeksu"
+              validate={{
+                required: {
+                  value: true,
+                  errorMessage: "Wprowadź numer indeksu",
+                },
+                minLength: {
+                  value: 6,
+                  errorMessage: "Numer indeksu musi posiadać dokładnie 6 cyfr",
+                },
+                maxLength: {
+                  value: 6,
+                  errorMessage: "Numer indeksu musi posiadać dokładnie 6 cyfr",
+                },
+              }}
             />
 
             <Label for="fullTimeStudies">Forma studiów</Label>
@@ -140,7 +166,7 @@ class ModalUser extends Component {
               <MenuItem value={true}>Stacjonarne</MenuItem>
               <MenuItem value={false}>Niestacjonarne</MenuItem>
             </Select>
-          </form>
+          </AvForm>
         </ModalBody>
         <ModalFooter>
           <Button

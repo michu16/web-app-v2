@@ -75,28 +75,6 @@ const Login = () => {
   const classes = useStyles();
 
   return (
-    // <div>
-    //   <h1 className="text-center">Strona logowania</h1>
-    //   <div className="col-sm-6 offset-sm-3">
-    //     <input
-    //       type="text"
-    //       placeholder="Nazwa użytkownika"
-    //       className="form-control"
-    //       onChange={(e) => setUsername(e.target.value)}
-    //     />
-    //     <br />
-    //     <input
-    //       type="password"
-    //       placeholder="Hasło"
-    //       className="form-control"
-    //       onChange={(e) => setPassword(e.target.value)}
-    //     />
-    //     <br />
-    //     <button onClick={login} className="btn btn-primary text-center">
-    //       Zaloguj
-    //     </button>
-    //   </div>
-    // </div>
     <Container className="bg-light" component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
@@ -138,18 +116,10 @@ const Login = () => {
             fullWidth
             variant="contained"
             color="primary"
-            // className={classes.submit}
             onClick={login}
           >
             Zaloguj się
           </Button>
-          <Grid container>
-            <Grid item className="mt-3">
-              <Link href="/register" variant="body2">
-                {"Nie masz konta? Zarejestruj się"}
-              </Link>
-            </Grid>
-          </Grid>
         </form>
       </div>
       <Box mt={8}>
